@@ -9,8 +9,8 @@
     "start:dev": "nest start --watch",
     "build": "nest build",
     "lint": "eslint .",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" && eslint --fix \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" && eslint \"src/**/*.ts\"",
     "test": "jest"
   },
   "dependencies": {
