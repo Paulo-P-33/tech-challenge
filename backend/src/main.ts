@@ -1,5 +1,7 @@
+import 'dotenv/config';
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
+
 import { AppModule } from './nest/app.module';
 import { DomainExceptionFilter } from './nest/shared/domain-exception.filter';
 import { ZodExceptionFilter } from './nest/shared/zod-exception.filter';
