@@ -1,9 +1,20 @@
-import { Body, Controller, Get, Post, Req, UseFilters, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
 
 import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { Roles } from '../../shared/roles.decorator';
+import { RolesGuard } from '../../shared/roles.guard';
+
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 const registerSchema = z.object({
   name: z.string().min(1),
@@ -21,24 +32,51 @@ const loginSchema = z.object({
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Post('/register')
   async register(@Body() body: unknown) {
     const input = registerSchema.parse(body);
     const { user, accessToken } = await this.auth.register(input);
-    return { user: { id: user.id, name: user.name, email: user.email }, accessToken };
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+    };
   }
 
   @Post('/login')
   async login(@Body() body: unknown) {
     const input = loginSchema.parse(body);
     const { user, accessToken } = await this.auth.login(input);
-    return { user: { id: user.id, name: user.name, email: user.email }, accessToken };
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('/me')
-  async me(@Req() req: { user: { id: string; name: string; email: string } }) {
-    return req.user;
+  async me(
+    @Req()
+    req: {
+      user: { id: string; name: string; email: string; role: 'user' | 'admin' };
+    },
+  ) {
+    return {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+    };
   }
 }
-

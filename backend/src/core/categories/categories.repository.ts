@@ -7,4 +7,3 @@ export interface CategoriesRepository {
   create(category: Category): Promise<void>;
   delete(id: CategoryId): Promise<void>;
 }
-

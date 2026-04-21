@@ -1,10 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Post, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
-import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
+
 import { CreateProductUseCase } from '../../../core/products/use-cases/create-product.usecase';
 import { DeleteProductUseCase } from '../../../core/products/use-cases/delete-product.usecase';
 import { GetProductUseCase } from '../../../core/products/use-cases/get-product.usecase';
 import { ListProductsUseCase } from '../../../core/products/use-cases/list-products.usecase';
+import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 import { presentProduct } from './products.presenter';
 
 const createProductBodySchema = z.object({
@@ -39,6 +51,7 @@ export class ProductsController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(@Body() body: unknown) {
     const input = createProductBodySchema.parse(body);
     const product = await this.createProduct.execute(input);
@@ -46,9 +59,9 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string) {
     await this.deleteProduct.execute(id);
     return { ok: true };
   }
 }
-

@@ -8,4 +8,3 @@ export class ListProductsUseCase {
     return this.repo.list();
   }
 }
-

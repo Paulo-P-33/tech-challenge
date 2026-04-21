@@ -1,7 +1,7 @@
-import { NotFoundError } from '../../shared/errors';
-import type { Clock } from '../../shared/clock';
-import type { IdGenerator } from '../../shared/id';
 import type { CategoriesRepository } from '../../categories/categories.repository';
+import type { Clock } from '../../shared/clock';
+import { NotFoundError } from '../../shared/errors';
+import type { IdGenerator } from '../../shared/id';
 import { Product, type Money } from '../product.entity';
 import type { ProductsRepository } from '../products.repository';
 
@@ -37,4 +37,3 @@ export class CreateProductUseCase {
     return product;
   }
 }
-

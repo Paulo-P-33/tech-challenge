@@ -1,5 +1,5 @@
-import type { Category } from '../category.entity';
 import type { CategoriesRepository } from '../categories.repository';
+import type { Category } from '../category.entity';
 
 export class ListCategoriesUseCase {
   constructor(private readonly repo: CategoriesRepository) {}
@@ -8,4 +8,3 @@ export class ListCategoriesUseCase {
     return this.repo.list();
   }
 }
-

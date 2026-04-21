@@ -1,5 +1,5 @@
-import type { UsersRepository } from '../users.repository';
 import type { User } from '../user.entity';
+import type { UsersRepository } from '../users.repository';
 
 export class ListUsersUseCase {
   constructor(private readonly repo: UsersRepository) {}
@@ -8,4 +8,3 @@ export class ListUsersUseCase {
     return this.repo.list();
   }
 }
-

@@ -27,10 +27,14 @@ export class Product {
     props: Omit<ProductProps, 'createdAt' | 'updatedAt'> &
       Partial<Pick<ProductProps, 'createdAt' | 'updatedAt'>>,
   ): Product {
-    if (!props.name?.trim()) throw new ValidationError('Product.name is required');
-    if (!props.categoryId?.trim()) throw new ValidationError('Product.categoryId is required');
+    if (!props.name?.trim())
+      throw new ValidationError('Product.name is required');
+    if (!props.categoryId?.trim())
+      throw new ValidationError('Product.categoryId is required');
     if (!Number.isInteger(props.price?.amount) || props.price.amount < 0) {
-      throw new ValidationError('Product.price.amount must be an integer >= 0 (cents)');
+      throw new ValidationError(
+        'Product.price.amount must be an integer >= 0 (cents)',
+      );
     }
 
     const now = new Date();
@@ -63,4 +67,3 @@ export class Product {
     return this.props.updatedAt;
   }
 }
-

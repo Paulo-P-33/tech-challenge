@@ -5,8 +5,8 @@ import { CreateUserUseCase } from '../../../core/users/use-cases/create-user.use
 import { PersistenceModule } from '../../persistence/persistence.module';
 import { CoreProvidersModule } from '../../shared/core-providers.module';
 import { TOKENS } from '../../shared/tokens';
+
 import { AuthController } from './auth.controller';
-import { AuthCredentialsMemoryRepository } from './auth.credentials.memory-repository';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 
@@ -21,7 +21,6 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [
-    { provide: TOKENS.authCredentialsRepo, useClass: AuthCredentialsMemoryRepository },
     {
       provide: CreateUserUseCase,
       inject: [TOKENS.usersRepo, TOKENS.idGenerator, TOKENS.clock],
@@ -32,4 +31,3 @@ import { JwtStrategy } from './jwt.strategy';
   ],
 })
 export class AuthNestModule {}
-

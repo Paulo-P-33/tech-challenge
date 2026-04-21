@@ -1,5 +1,5 @@
-import type { ProductsRepository } from '../../../core/products/products.repository';
 import type { Product, ProductId } from '../../../core/products/product.entity';
+import type { ProductsRepository } from '../../../core/products/products.repository';
 
 export class ProductsMemoryRepository implements ProductsRepository {
   private readonly items = new Map<ProductId, Product>();
@@ -20,4 +20,3 @@ export class ProductsMemoryRepository implements ProductsRepository {
     this.items.delete(id);
   }
 }
-

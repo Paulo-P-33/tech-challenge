@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
+
 import { CreateCategoryUseCase } from '../../../core/categories/use-cases/create-category.usecase';
 import { DeleteCategoryUseCase } from '../../../core/categories/use-cases/delete-category.usecase';
 import { GetCategoryUseCase } from '../../../core/categories/use-cases/get-category.usecase';
 import { ListCategoriesUseCase } from '../../../core/categories/use-cases/list-categories.usecase';
-import { TOKENS } from '../../shared/tokens';
-import { CategoriesController } from './categories.controller';
 import { PersistenceModule } from '../../persistence/persistence.module';
 import { CoreProvidersModule } from '../../shared/core-providers.module';
+import { TOKENS } from '../../shared/tokens';
+
+import { CategoriesController } from './categories.controller';
 
 @Module({
   imports: [PersistenceModule, CoreProvidersModule],
@@ -15,7 +17,8 @@ import { CoreProvidersModule } from '../../shared/core-providers.module';
     {
       provide: CreateCategoryUseCase,
       inject: [TOKENS.categoriesRepo, TOKENS.idGenerator, TOKENS.clock],
-      useFactory: (repo, id, clock) => new CreateCategoryUseCase(repo, id, clock),
+      useFactory: (repo, id, clock) =>
+        new CreateCategoryUseCase(repo, id, clock),
     },
     {
       provide: ListCategoriesUseCase,
@@ -35,4 +38,3 @@ import { CoreProvidersModule } from '../../shared/core-providers.module';
   ],
 })
 export class CategoriesNestModule {}
-

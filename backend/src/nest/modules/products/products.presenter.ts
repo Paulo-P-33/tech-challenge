@@ -10,4 +10,3 @@ export function presentProduct(product: Product) {
     updatedAt: product.updatedAt.toISOString(),
   };
 }
-

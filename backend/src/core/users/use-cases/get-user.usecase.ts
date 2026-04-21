@@ -1,6 +1,6 @@
 import { NotFoundError } from '../../shared/errors';
-import type { UsersRepository } from '../users.repository';
 import type { User, UserId } from '../user.entity';
+import type { UsersRepository } from '../users.repository';
 
 export class GetUserUseCase {
   constructor(private readonly repo: UsersRepository) {}
@@ -11,4 +11,3 @@ export class GetUserUseCase {
     return user;
   }
 }
-

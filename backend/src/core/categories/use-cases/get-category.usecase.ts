@@ -1,6 +1,6 @@
 import { NotFoundError } from '../../shared/errors';
-import type { Category, CategoryId } from '../category.entity';
 import type { CategoriesRepository } from '../categories.repository';
+import type { Category, CategoryId } from '../category.entity';
 
 export class GetCategoryUseCase {
   constructor(private readonly repo: CategoriesRepository) {}
@@ -11,4 +11,3 @@ export class GetCategoryUseCase {
     return category;
   }
 }
-

@@ -1,11 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Post, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
-import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
+
 import { CreateCategoryUseCase } from '../../../core/categories/use-cases/create-category.usecase';
 import { DeleteCategoryUseCase } from '../../../core/categories/use-cases/delete-category.usecase';
 import { GetCategoryUseCase } from '../../../core/categories/use-cases/get-category.usecase';
 import { ListCategoriesUseCase } from '../../../core/categories/use-cases/list-categories.usecase';
+import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 import { presentCategory } from './categories.presenter';
+
 
 const createCategoryBodySchema = z.object({
   name: z.string().min(1),
@@ -34,6 +47,7 @@ export class CategoriesController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(@Body() body: unknown) {
     const input = createCategoryBodySchema.parse(body);
     const category = await this.createCategory.execute(input);
@@ -41,9 +55,9 @@ export class CategoriesController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string) {
     await this.deleteCategory.execute(id);
     return { ok: true };
   }
 }
-

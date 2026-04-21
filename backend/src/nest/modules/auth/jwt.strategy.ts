@@ -2,8 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { TOKENS } from '../../shared/tokens';
 import type { UsersRepository } from '../../../core/users/users.repository';
+import { TOKENS } from '../../shared/tokens';
+
 import { AuthService } from './auth.service';
 
 @Injectable()
@@ -23,4 +24,3 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return await this.auth.validateUserFromJwtPayload(payload);
   }
 }
-

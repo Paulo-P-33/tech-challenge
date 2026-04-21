@@ -1,6 +1,6 @@
 import { NotFoundError } from '../../shared/errors';
-import type { ProductsRepository } from '../products.repository';
 import type { ProductId } from '../product.entity';
+import type { ProductsRepository } from '../products.repository';
 
 export class DeleteProductUseCase {
   constructor(private readonly repo: ProductsRepository) {}
@@ -11,4 +11,3 @@ export class DeleteProductUseCase {
     await this.repo.delete(id);
   }
 }
-

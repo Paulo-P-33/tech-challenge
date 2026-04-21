@@ -8,4 +8,3 @@ export function presentCategory(category: Category) {
     updatedAt: category.updatedAt.toISOString(),
   };
 }
-

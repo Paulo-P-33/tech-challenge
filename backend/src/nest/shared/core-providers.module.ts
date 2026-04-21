@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+
 import { systemClock } from '../../core/shared/clock';
 import { uuidV4 } from '../../core/shared/id';
+
 import { TOKENS } from './tokens';
 
 @Module({
@@ -11,4 +13,3 @@ import { TOKENS } from './tokens';
   exports: [TOKENS.idGenerator, TOKENS.clock],
 })
 export class CoreProvidersModule {}
-

@@ -1,6 +1,6 @@
 import { NotFoundError } from '../../shared/errors';
-import type { CategoryId } from '../category.entity';
 import type { CategoriesRepository } from '../categories.repository';
+import type { CategoryId } from '../category.entity';
 
 export class DeleteCategoryUseCase {
   constructor(private readonly repo: CategoriesRepository) {}
@@ -11,4 +11,3 @@ export class DeleteCategoryUseCase {
     await this.repo.delete(id);
   }
 }
-

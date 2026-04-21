@@ -1,8 +1,8 @@
-import { ConflictError } from '../../shared/errors';
 import type { Clock } from '../../shared/clock';
+import { ConflictError } from '../../shared/errors';
 import type { IdGenerator } from '../../shared/id';
-import { Category } from '../category.entity';
 import type { CategoriesRepository } from '../categories.repository';
+import { Category } from '../category.entity';
 
 export interface CreateCategoryInput {
   name: string;
@@ -17,7 +17,8 @@ export class CreateCategoryUseCase {
 
   async execute(input: CreateCategoryInput): Promise<Category> {
     const existing = await this.repo.findByName(input.name);
-    if (existing) throw new ConflictError('Category with this name already exists');
+    if (existing)
+      throw new ConflictError('Category with this name already exists');
 
     const now = this.clock();
     const category = Category.create({
@@ -31,4 +32,3 @@ export class CreateCategoryUseCase {
     return category;
   }
 }
-

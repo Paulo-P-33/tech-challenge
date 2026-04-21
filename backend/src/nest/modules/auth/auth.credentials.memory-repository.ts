@@ -11,4 +11,3 @@ export class AuthCredentialsMemoryRepository implements AuthCredentialsRepositor
     return this.hashesByUserId.get(userId) ?? null;
   }
 }
-

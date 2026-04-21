@@ -1,5 +1,5 @@
-import type { UsersRepository } from '../../../core/users/users.repository';
 import type { User, UserId } from '../../../core/users/user.entity';
+import type { UsersRepository } from '../../../core/users/users.repository';
 
 export class UsersMemoryRepository implements UsersRepository {
   private readonly items = new Map<UserId, User>();
@@ -32,4 +32,3 @@ export class UsersMemoryRepository implements UsersRepository {
     this.items.delete(id);
   }
 }
-

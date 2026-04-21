@@ -6,4 +6,3 @@ export interface ProductsRepository {
   create(product: Product): Promise<void>;
   delete(id: ProductId): Promise<void>;
 }
-

@@ -1,5 +1,8 @@
 import type { CategoriesRepository } from '../../../core/categories/categories.repository';
-import type { Category, CategoryId } from '../../../core/categories/category.entity';
+import type {
+  Category,
+  CategoryId,
+} from '../../../core/categories/category.entity';
 
 export class CategoriesMemoryRepository implements CategoriesRepository {
   private readonly items = new Map<CategoryId, Category>();
@@ -28,4 +31,3 @@ export class CategoriesMemoryRepository implements CategoriesRepository {
     this.items.delete(id);
   }
 }
-

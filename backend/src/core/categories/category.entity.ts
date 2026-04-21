@@ -20,7 +20,8 @@ export class Category {
     props: Omit<CategoryProps, 'createdAt' | 'updatedAt'> &
       Partial<Pick<CategoryProps, 'createdAt' | 'updatedAt'>>,
   ): Category {
-    if (!props.name?.trim()) throw new ValidationError('Category.name is required');
+    if (!props.name?.trim())
+      throw new ValidationError('Category.name is required');
     const now = new Date();
     return new Category({
       id: props.id,
@@ -43,4 +44,3 @@ export class Category {
     return this.props.updatedAt;
   }
 }
-
