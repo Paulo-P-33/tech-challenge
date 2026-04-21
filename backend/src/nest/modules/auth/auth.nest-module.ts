@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
 import { CreateUserUseCase } from '../../../core/users/use-cases/create-user.usecase';
-import { PersistenceModule } from '../../persistence/persistence.module';
+import { PrismaPersistenceModule } from '../../persistence/prisma-persistence.module';
 import { CoreProvidersModule } from '../../shared/core-providers.module';
 import { TOKENS } from '../../shared/tokens';
 
@@ -12,7 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    PersistenceModule,
+    PrismaPersistenceModule,
     CoreProvidersModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'dev-secret-change-me',

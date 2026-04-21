@@ -4,14 +4,14 @@ import { CreateUserUseCase } from '../../../core/users/use-cases/create-user.use
 import { DeleteUserUseCase } from '../../../core/users/use-cases/delete-user.usecase';
 import { GetUserUseCase } from '../../../core/users/use-cases/get-user.usecase';
 import { ListUsersUseCase } from '../../../core/users/use-cases/list-users.usecase';
-import { PersistenceModule } from '../../persistence/persistence.module';
+import { PrismaPersistenceModule } from '../../persistence/prisma-persistence.module';
 import { CoreProvidersModule } from '../../shared/core-providers.module';
 import { TOKENS } from '../../shared/tokens';
 
 import { UsersController } from './users.controller';
 
 @Module({
-  imports: [PersistenceModule, CoreProvidersModule],
+  imports: [PrismaPersistenceModule, CoreProvidersModule],
   controllers: [UsersController],
   providers: [
     {

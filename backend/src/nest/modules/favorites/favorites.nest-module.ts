@@ -3,13 +3,13 @@ import { Module } from '@nestjs/common';
 import { FavoriteProductUseCase } from '../../../core/favorites/use-cases/favorite-product.usecase';
 import { ListFavoritesUseCase } from '../../../core/favorites/use-cases/list-favorites.usecase';
 import { UnfavoriteProductUseCase } from '../../../core/favorites/use-cases/unfavorite-product.usecase';
-import { PersistenceModule } from '../../persistence/persistence.module';
+import { PrismaPersistenceModule } from '../../persistence/prisma-persistence.module';
 import { TOKENS } from '../../shared/tokens';
 
 import { FavoritesController } from './favorites.controller';
 
 @Module({
-  imports: [PersistenceModule],
+  imports: [PrismaPersistenceModule],
   controllers: [FavoritesController],
   providers: [
     {

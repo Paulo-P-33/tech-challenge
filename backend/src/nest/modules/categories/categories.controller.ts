@@ -19,7 +19,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { presentCategory } from './categories.presenter';
 
-
 const createCategoryBodySchema = z.object({
   name: z.string().min(1),
 });

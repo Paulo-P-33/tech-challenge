@@ -4,14 +4,14 @@ import { CreateProductUseCase } from '../../../core/products/use-cases/create-pr
 import { DeleteProductUseCase } from '../../../core/products/use-cases/delete-product.usecase';
 import { GetProductUseCase } from '../../../core/products/use-cases/get-product.usecase';
 import { ListProductsUseCase } from '../../../core/products/use-cases/list-products.usecase';
-import { PersistenceModule } from '../../persistence/persistence.module';
+import { PrismaPersistenceModule } from '../../persistence/prisma-persistence.module';
 import { CoreProvidersModule } from '../../shared/core-providers.module';
 import { TOKENS } from '../../shared/tokens';
 
 import { ProductsController } from './products.controller';
 
 @Module({
-  imports: [PersistenceModule, CoreProvidersModule],
+  imports: [PrismaPersistenceModule, CoreProvidersModule],
   controllers: [ProductsController],
   providers: [
     {
