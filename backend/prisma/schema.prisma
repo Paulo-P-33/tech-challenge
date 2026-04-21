@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String          @id
+  name        String
+  email       String          @unique
+  role        String
+  createdAt   DateTime        @map("created_at")
+  updatedAt   DateTime        @map("updated_at")
+  favorites   Favorite[]
+  credentials AuthCredential?
+
+  @@map("users")
+}
+
+model AuthCredential {
+  userId       String @id @map("user_id")
+  passwordHash String @map("password_hash")
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("auth_credentials")
+}
+
+model Category {
+  id        String    @id
+  name      String    @unique
+  createdAt DateTime  @map("created_at")
+  updatedAt DateTime  @map("updated_at")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id            String   @id
+  name          String
+  categoryId    String   @map("category_id")
+  priceAmount   Int      @map("price_amount")
+  priceCurrency String   @map("price_currency")
+  createdAt     DateTime @map("created_at")
+  updatedAt     DateTime @map("updated_at")
+  category      Category @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}
+
+model Favorite {
+  userId     String   @map("user_id")
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  createdAt  DateTime @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, targetType, targetId])
+  @@map("favorites")
+}
