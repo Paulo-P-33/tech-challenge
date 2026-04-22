@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { AuthCredentialsPrismaRepository } from '../modules/auth/auth.credentials.prisma-repository';
 import { TOKENS } from '../shared/tokens';
 
+import { AuditLogsPrismaRepository } from './prisma/audit-logs.prisma-repository';
 import { CategoriesPrismaRepository } from './prisma/categories.prisma-repository';
 import { FavoritesPrismaRepository } from './prisma/favorites.prisma-repository';
 import { PrismaService } from './prisma/prisma.service';
@@ -20,6 +21,10 @@ import { UsersPrismaRepository } from './prisma/users.prisma-repository';
       provide: TOKENS.authCredentialsRepo,
       useClass: AuthCredentialsPrismaRepository,
     },
+    {
+      provide: TOKENS.auditLogsRepo,
+      useClass: AuditLogsPrismaRepository,
+    },
   ],
   exports: [
     PrismaService,
@@ -28,6 +33,7 @@ import { UsersPrismaRepository } from './prisma/users.prisma-repository';
     TOKENS.productsRepo,
     TOKENS.favoritesRepo,
     TOKENS.authCredentialsRepo,
+    TOKENS.auditLogsRepo,
   ],
 })
 export class PrismaPersistenceModule {}
