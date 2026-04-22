@@ -22,6 +22,7 @@ import { CreateCategoryUseCase } from '../../../core/categories/use-cases/create
 import { DeleteCategoryUseCase } from '../../../core/categories/use-cases/delete-category.usecase';
 import { GetCategoryUseCase } from '../../../core/categories/use-cases/get-category.usecase';
 import { ListCategoriesUseCase } from '../../../core/categories/use-cases/list-categories.usecase';
+import { Audit } from '../../shared/audit.decorator';
 import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -42,7 +43,9 @@ const categorySchema = {
 };
 
 @ApiTags('Categories')
+@ApiBearerAuth()
 @UseFilters(DomainExceptionFilter)
+@UseGuards(JwtAuthGuard)
 @Controller('/categories')
 export class CategoriesController {
   constructor(
@@ -53,6 +56,7 @@ export class CategoriesController {
   ) {}
 
   @Get()
+  @Audit('CATEGORY_LIST')
   @ApiOperation({ summary: 'Listar todas as categorias' })
   @ApiResponse({
     status: 200,
@@ -65,9 +69,14 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @Audit('CATEGORY_VIEWED', 'category')
   @ApiOperation({ summary: 'Buscar categoria por ID' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID da categoria' })
-  @ApiResponse({ status: 200, description: 'Dados da categoria', schema: categorySchema })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados da categoria',
+    schema: categorySchema,
+  })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
   async get(@Param('id') id: string) {
     const category = await this.getCategory.execute(id);
@@ -75,8 +84,7 @@ export class CategoriesController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @Audit('CATEGORY_CREATED', 'category')
   @ApiOperation({ summary: 'Criar categoria (autenticado)' })
   @ApiBody({
     schema: {
@@ -87,7 +95,11 @@ export class CategoriesController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Categoria criada', schema: categorySchema })
+  @ApiResponse({
+    status: 201,
+    description: 'Categoria criada',
+    schema: categorySchema,
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 409, description: 'Categoria já existe' })
   async create(@Body() body: unknown) {
@@ -97,11 +109,14 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @Audit('CATEGORY_DELETED', 'category')
   @ApiOperation({ summary: 'Remover categoria (autenticado)' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID da categoria' })
-  @ApiResponse({ status: 200, description: 'Categoria removida', schema: { type: 'object', properties: { ok: { type: 'boolean' } } } })
+  @ApiResponse({
+    status: 200,
+    description: 'Categoria removida',
+    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
   async delete(@Param('id') id: string) {

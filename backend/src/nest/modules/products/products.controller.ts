@@ -22,6 +22,7 @@ import { CreateProductUseCase } from '../../../core/products/use-cases/create-pr
 import { DeleteProductUseCase } from '../../../core/products/use-cases/delete-product.usecase';
 import { GetProductUseCase } from '../../../core/products/use-cases/get-product.usecase';
 import { ListProductsUseCase } from '../../../core/products/use-cases/list-products.usecase';
+import { Audit } from '../../shared/audit.decorator';
 import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -55,7 +56,9 @@ const productSchema = {
 };
 
 @ApiTags('Products')
+@ApiBearerAuth()
 @UseFilters(DomainExceptionFilter)
+@UseGuards(JwtAuthGuard)
 @Controller('/products')
 export class ProductsController {
   constructor(
@@ -66,6 +69,7 @@ export class ProductsController {
   ) {}
 
   @Get()
+  @Audit('PRODUCT_LIST')
   @ApiOperation({ summary: 'Listar todos os produtos' })
   @ApiResponse({
     status: 200,
@@ -78,9 +82,14 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @Audit('PRODUCT_VIEWED', 'product')
   @ApiOperation({ summary: 'Buscar produto por ID' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID do produto' })
-  @ApiResponse({ status: 200, description: 'Dados do produto', schema: productSchema })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados do produto',
+    schema: productSchema,
+  })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   async get(@Param('id') id: string) {
     const product = await this.getProduct.execute(id);
@@ -88,8 +97,7 @@ export class ProductsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @Audit('PRODUCT_CREATED', 'product')
   @ApiOperation({ summary: 'Criar produto (autenticado)' })
   @ApiBody({
     schema: {
@@ -102,14 +110,27 @@ export class ProductsController {
           type: 'object',
           required: ['currency', 'amount'],
           properties: {
-            currency: { type: 'string', enum: ['BRL', 'USD', 'EUR'], example: 'BRL' },
-            amount: { type: 'integer', minimum: 0, example: 299900, description: 'Valor em centavos' },
+            currency: {
+              type: 'string',
+              enum: ['BRL', 'USD', 'EUR'],
+              example: 'BRL',
+            },
+            amount: {
+              type: 'integer',
+              minimum: 0,
+              example: 299900,
+              description: 'Valor em centavos',
+            },
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Produto criado', schema: productSchema })
+  @ApiResponse({
+    status: 201,
+    description: 'Produto criado',
+    schema: productSchema,
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
   async create(@Body() body: unknown) {
@@ -119,11 +140,14 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @Audit('PRODUCT_DELETED', 'product')
   @ApiOperation({ summary: 'Remover produto (autenticado)' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID do produto' })
-  @ApiResponse({ status: 200, description: 'Produto removido', schema: { type: 'object', properties: { ok: { type: 'boolean' } } } })
+  @ApiResponse({
+    status: 200,
+    description: 'Produto removido',
+    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   async delete(@Param('id') id: string) {

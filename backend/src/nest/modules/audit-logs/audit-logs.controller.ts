@@ -40,11 +40,15 @@ export class AuditLogsController {
   @ApiOperation({ summary: 'Listar todos os logs de auditoria (apenas admin)' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de logs de auditoria, ordenada do mais recente ao mais antigo',
+    description:
+      'Lista de logs de auditoria, ordenada do mais recente ao mais antigo',
     schema: { type: 'array', items: auditLogSchema },
   })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
-  @ApiResponse({ status: 403, description: 'Acesso negado — role admin necessária' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado — role admin necessária',
+  })
   async list() {
     const logs = await this.listAuditLogs.execute();
     return logs.map(presentAuditLog);

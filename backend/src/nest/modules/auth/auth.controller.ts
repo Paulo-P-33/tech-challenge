@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { z } from 'zod';
 
+import { Audit } from '../../shared/audit.decorator';
 import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
 import { Roles } from '../../shared/roles.decorator';
 import { RolesGuard } from '../../shared/roles.guard';
@@ -43,6 +44,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Post('/register')
+  @Audit('USER_REGISTERED', 'user')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Registrar novo usuário (apenas admin)' })
   @ApiBody({
@@ -76,7 +78,10 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
-  @ApiResponse({ status: 403, description: 'Acesso negado — role admin necessária' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado — role admin necessária',
+  })
   async register(@Body() body: unknown) {
     const input = registerSchema.parse(body);
     const { user, accessToken } = await this.auth.register(input);
@@ -92,6 +97,7 @@ export class AuthController {
   }
 
   @Post('/login')
+  @Audit('USER_LOGIN')
   @ApiOperation({ summary: 'Login' })
   @ApiBody({
     schema: {
@@ -139,6 +145,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/me')
+  @Audit('AUTH_ME_VIEWED')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Retorna o usuário autenticado atual' })
   @ApiResponse({

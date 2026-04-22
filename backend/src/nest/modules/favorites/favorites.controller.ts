@@ -19,6 +19,7 @@ import {
 import { FavoriteProductUseCase } from '../../../core/favorites/use-cases/favorite-product.usecase';
 import { ListFavoritesUseCase } from '../../../core/favorites/use-cases/list-favorites.usecase';
 import { UnfavoriteProductUseCase } from '../../../core/favorites/use-cases/unfavorite-product.usecase';
+import { Audit } from '../../shared/audit.decorator';
 import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -48,9 +49,14 @@ export class FavoritesController {
   ) {}
 
   @Post('/products/:id/favorite')
+  @Audit('PRODUCT_FAVORITED', 'product')
   @ApiOperation({ summary: 'Adicionar produto aos favoritos' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID do produto' })
-  @ApiResponse({ status: 201, description: 'Produto favoritado', schema: { type: 'object', properties: { ok: { type: 'boolean' } } } })
+  @ApiResponse({
+    status: 201,
+    description: 'Produto favoritado',
+    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   async favoriteProd(@Req() req: AuthedReq, @Param('id') id: string) {
@@ -59,9 +65,14 @@ export class FavoritesController {
   }
 
   @Delete('/products/:id/favorite')
+  @Audit('PRODUCT_UNFAVORITED', 'product')
   @ApiOperation({ summary: 'Remover produto dos favoritos' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID do produto' })
-  @ApiResponse({ status: 200, description: 'Produto removido dos favoritos', schema: { type: 'object', properties: { ok: { type: 'boolean' } } } })
+  @ApiResponse({
+    status: 200,
+    description: 'Produto removido dos favoritos',
+    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 404, description: 'Favorito não encontrado' })
   async unfavoriteProd(@Req() req: AuthedReq, @Param('id') id: string) {
@@ -70,6 +81,7 @@ export class FavoritesController {
   }
 
   @Get('/me/favorites')
+  @Audit('FAVORITES_LIST')
   @ApiOperation({ summary: 'Listar favoritos do usuário autenticado' })
   @ApiResponse({
     status: 200,

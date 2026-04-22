@@ -4,6 +4,7 @@ export const TOKENS = {
   productsRepo: Symbol('productsRepo'),
   favoritesRepo: Symbol('favoritesRepo'),
   authCredentialsRepo: Symbol('authCredentialsRepo'),
+  auditLogsRepo: Symbol('auditLogsRepo'),
   idGenerator: Symbol('idGenerator'),
   clock: Symbol('clock'),
 } as const;

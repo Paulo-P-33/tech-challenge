@@ -4,7 +4,6 @@ import { Product, ProductId } from '../../../core/products/product.entity';
 import type { Money } from '../../../core/products/product.entity';
 import { ProductsRepository } from '../../../core/products/products.repository';
 
-
 import { PrismaService } from './prisma.service';
 
 @Injectable()
