@@ -59,7 +59,8 @@ const productSchema = {
     image: {
       type: 'string',
       nullable: true,
-      description: 'Imagem do produto em base64 data URL (data:image/...;base64,...)',
+      description:
+        'Imagem do produto em base64 data URL (data:image/...;base64,...)',
     },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
@@ -120,7 +121,11 @@ export class ProductsController {
       properties: {
         name: { type: 'string', example: 'Notebook Pro' },
         categoryId: { type: 'string', example: 'uuid-da-categoria' },
-        priceCurrency: { type: 'string', enum: ['BRL', 'USD', 'EUR'], example: 'BRL' },
+        priceCurrency: {
+          type: 'string',
+          enum: ['BRL', 'USD', 'EUR'],
+          example: 'BRL',
+        },
         priceAmount: {
           type: 'integer',
           minimum: 0,
@@ -135,13 +140,14 @@ export class ProductsController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Produto criado', schema: productSchema })
+  @ApiResponse({
+    status: 201,
+    description: 'Produto criado',
+    schema: productSchema,
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
-  async create(
-    @Body() body: unknown,
-    @UploadedFile() file: UploadedFileType,
-  ) {
+  async create(@Body() body: unknown, @UploadedFile() file: UploadedFileType) {
     const input = createProductBodySchema.parse(body);
     const product = await this.createProduct.execute({
       name: input.name,
@@ -162,11 +168,19 @@ export class ProductsController {
     schema: {
       type: 'object',
       properties: {
-        image: { type: 'string', format: 'binary', description: 'Arquivo de imagem (JPEG, PNG, WebP, etc.)' },
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo de imagem (JPEG, PNG, WebP, etc.)',
+        },
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Imagem atualizada', schema: productSchema })
+  @ApiResponse({
+    status: 200,
+    description: 'Imagem atualizada',
+    schema: productSchema,
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   async uploadImage(

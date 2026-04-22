@@ -20,7 +20,10 @@ export class ProductsPrismaRepository implements ProductsRepository {
     if (!row) return null;
     return Product.create({
       ...row,
-      price: { currency: row.priceCurrency as Money['currency'], amount: row.priceAmount },
+      price: {
+        currency: row.priceCurrency as Money['currency'],
+        amount: row.priceAmount,
+      },
       image: toBuffer(row.image),
     });
   }
@@ -30,7 +33,10 @@ export class ProductsPrismaRepository implements ProductsRepository {
     return rows.map((row) =>
       Product.create({
         ...row,
-        price: { currency: row.priceCurrency as Money['currency'], amount: row.priceAmount },
+        price: {
+          currency: row.priceCurrency as Money['currency'],
+          amount: row.priceAmount,
+        },
         image: toBuffer(row.image),
       }),
     );
@@ -44,7 +50,7 @@ export class ProductsPrismaRepository implements ProductsRepository {
         categoryId: product.categoryId,
         priceAmount: product.price.amount,
         priceCurrency: product.price.currency,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         image: (product.image ?? undefined) as any,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,
@@ -60,7 +66,7 @@ export class ProductsPrismaRepository implements ProductsRepository {
         categoryId: product.categoryId,
         priceAmount: product.price.amount,
         priceCurrency: product.price.currency,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         image: product.image as any,
         updatedAt: product.updatedAt,
       },

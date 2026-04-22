@@ -20,6 +20,7 @@ import { Audit } from '../../shared/audit.decorator';
 import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
 import { Roles } from '../../shared/roles.decorator';
 import { RolesGuard } from '../../shared/roles.guard';
+import { presentUser } from '../users/users.presenter';
 
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -158,21 +159,18 @@ export class AuthController {
         name: { type: 'string' },
         email: { type: 'string' },
         role: { type: 'string', enum: ['user', 'admin'] },
+        avatar: {
+          type: 'string',
+          nullable: true,
+          description: 'Imagem de perfil em base64 data URL',
+        },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
       },
     },
   })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
-  async me(
-    @Req()
-    req: {
-      user: { id: string; name: string; email: string; role: 'user' | 'admin' };
-    },
-  ) {
-    return {
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email,
-      role: req.user.role,
-    };
+  async me(@Req() req: { user: Parameters<typeof presentUser>[0] }) {
+    return presentUser(req.user);
   }
 }

@@ -58,7 +58,8 @@ const userSchema = {
     avatar: {
       type: 'string',
       nullable: true,
-      description: 'Imagem de perfil em base64 data URL (data:image/...;base64,...)',
+      description:
+        'Imagem de perfil em base64 data URL (data:image/...;base64,...)',
     },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
@@ -161,17 +162,27 @@ export class UsersController {
   @Audit('USER_AVATAR_UPDATED', 'user')
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Atualizar imagem de perfil do usuário (apenas admin)' })
+  @ApiOperation({
+    summary: 'Atualizar imagem de perfil do usuário (apenas admin)',
+  })
   @ApiParam({ name: 'id', type: 'string', description: 'ID do usuário' })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        avatar: { type: 'string', format: 'binary', description: 'Arquivo de imagem (JPEG, PNG, WebP, etc.)' },
+        avatar: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo de imagem (JPEG, PNG, WebP, etc.)',
+        },
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Avatar atualizado', schema: userSchema })
+  @ApiResponse({
+    status: 200,
+    description: 'Avatar atualizado',
+    schema: userSchema,
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({ status: 403, description: 'Acesso negado' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })

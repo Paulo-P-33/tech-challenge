@@ -17,7 +17,11 @@ export class UsersPrismaRepository implements UsersRepository {
   async findById(id: UserId): Promise<User | null> {
     const row = await this.prisma.user.findUnique({ where: { id } });
     if (!row) return null;
-    return User.create({ ...row, role: row.role as UserRole, avatar: toBuffer(row.avatar) });
+    return User.create({
+      ...row,
+      role: row.role as UserRole,
+      avatar: toBuffer(row.avatar),
+    });
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -25,13 +29,21 @@ export class UsersPrismaRepository implements UsersRepository {
       where: { email: email.toLowerCase() },
     });
     if (!row) return null;
-    return User.create({ ...row, role: row.role as UserRole, avatar: toBuffer(row.avatar) });
+    return User.create({
+      ...row,
+      role: row.role as UserRole,
+      avatar: toBuffer(row.avatar),
+    });
   }
 
   async list(): Promise<User[]> {
     const rows = await this.prisma.user.findMany();
     return rows.map((row) =>
-      User.create({ ...row, role: row.role as UserRole, avatar: toBuffer(row.avatar) }),
+      User.create({
+        ...row,
+        role: row.role as UserRole,
+        avatar: toBuffer(row.avatar),
+      }),
     );
   }
 
@@ -42,7 +54,7 @@ export class UsersPrismaRepository implements UsersRepository {
         name: user.name,
         email: user.email,
         role: user.role,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         avatar: (user.avatar ?? undefined) as any,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -57,7 +69,7 @@ export class UsersPrismaRepository implements UsersRepository {
         name: user.name,
         email: user.email,
         role: user.role,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         avatar: user.avatar as any,
         updatedAt: user.updatedAt,
       },
