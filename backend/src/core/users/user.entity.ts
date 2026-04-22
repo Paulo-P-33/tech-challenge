@@ -9,6 +9,7 @@ export interface UserProps {
   name: string;
   email: string;
   role: UserRole;
+  avatar: Buffer | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,8 +22,8 @@ export class User {
   }
 
   static create(
-    props: Omit<UserProps, 'createdAt' | 'updatedAt'> &
-      Partial<Pick<UserProps, 'createdAt' | 'updatedAt'>>,
+    props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'avatar'> &
+      Partial<Pick<UserProps, 'createdAt' | 'updatedAt' | 'avatar'>>,
   ): User {
     if (!props.name?.trim()) throw new ValidationError('User.name is required');
     if (!props.email?.trim())
@@ -39,6 +40,7 @@ export class User {
       name: props.name.trim(),
       email,
       role: props.role,
+      avatar: props.avatar ?? null,
       createdAt: props.createdAt ?? now,
       updatedAt: props.updatedAt ?? now,
     });
@@ -56,6 +58,9 @@ export class User {
   get role() {
     return this.props.role;
   }
+  get avatar() {
+    return this.props.avatar;
+  }
   get createdAt() {
     return this.props.createdAt;
   }
@@ -66,6 +71,11 @@ export class User {
   rename(newName: string) {
     if (!newName?.trim()) throw new ValidationError('User.name is required');
     this.props.name = newName.trim();
+    this.props.updatedAt = new Date();
+  }
+
+  updateAvatar(data: Buffer | null) {
+    this.props.avatar = data;
     this.props.updatedAt = new Date();
   }
 }

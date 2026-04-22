@@ -4,5 +4,6 @@ export interface ProductsRepository {
   findById(id: ProductId): Promise<Product | null>;
   list(): Promise<Product[]>;
   create(product: Product): Promise<void>;
+  save(product: Product): Promise<void>;
   delete(id: ProductId): Promise<void>;
 }

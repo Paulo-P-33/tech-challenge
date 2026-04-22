@@ -4,6 +4,7 @@ import { CreateProductUseCase } from '../../../core/products/use-cases/create-pr
 import { DeleteProductUseCase } from '../../../core/products/use-cases/delete-product.usecase';
 import { GetProductUseCase } from '../../../core/products/use-cases/get-product.usecase';
 import { ListProductsUseCase } from '../../../core/products/use-cases/list-products.usecase';
+import { UpdateProductImageUseCase } from '../../../core/products/use-cases/update-product-image.usecase';
 import { PrismaPersistenceModule } from '../../persistence/prisma-persistence.module';
 import { CoreProvidersModule } from '../../shared/core-providers.module';
 import { TOKENS } from '../../shared/tokens';
@@ -39,6 +40,11 @@ import { ProductsController } from './products.controller';
       provide: DeleteProductUseCase,
       inject: [TOKENS.productsRepo],
       useFactory: (repo) => new DeleteProductUseCase(repo),
+    },
+    {
+      provide: UpdateProductImageUseCase,
+      inject: [TOKENS.productsRepo],
+      useFactory: (repo) => new UpdateProductImageUseCase(repo),
     },
   ],
 })

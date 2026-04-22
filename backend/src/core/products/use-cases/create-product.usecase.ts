@@ -9,6 +9,7 @@ export interface CreateProductInput {
   name: string;
   categoryId: string;
   price: Money;
+  image?: Buffer | null;
 }
 
 export class CreateProductUseCase {
@@ -29,6 +30,7 @@ export class CreateProductUseCase {
       name: input.name,
       categoryId: input.categoryId,
       price: input.price,
+      image: input.image ?? null,
       createdAt: now,
       updatedAt: now,
     });

@@ -6,6 +6,9 @@ export function presentUser(user: User) {
     name: user.name,
     email: user.email,
     role: user.role,
+    avatar: user.avatar
+      ? `data:image/jpeg;base64,${user.avatar.toString('base64')}`
+      : null,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };

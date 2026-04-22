@@ -6,12 +6,17 @@ import {
   Inject,
   Param,
   Post,
+  Put,
+  UploadedFile,
   UseFilters,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -24,6 +29,7 @@ import { CreateUserUseCase } from '../../../core/users/use-cases/create-user.use
 import { DeleteUserUseCase } from '../../../core/users/use-cases/delete-user.usecase';
 import { GetUserUseCase } from '../../../core/users/use-cases/get-user.usecase';
 import { ListUsersUseCase } from '../../../core/users/use-cases/list-users.usecase';
+import { UpdateUserAvatarUseCase } from '../../../core/users/use-cases/update-user-avatar.usecase';
 import { Audit } from '../../shared/audit.decorator';
 import { DomainExceptionFilter } from '../../shared/domain-exception.filter';
 import { Roles } from '../../shared/roles.decorator';
@@ -33,6 +39,8 @@ import type { AuthCredentialsRepository } from '../auth/auth.credentials.reposit
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { presentUser } from './users.presenter';
+
+type UploadedFileType = { buffer: Buffer; mimetype: string } | undefined;
 
 const createUserBodySchema = z.object({
   name: z.string().min(1),
@@ -47,6 +55,11 @@ const userSchema = {
     name: { type: 'string' },
     email: { type: 'string' },
     role: { type: 'string', enum: ['user', 'admin'] },
+    avatar: {
+      type: 'string',
+      nullable: true,
+      description: 'Imagem de perfil em base64 data URL (data:image/...;base64,...)',
+    },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
@@ -64,6 +77,7 @@ export class UsersController {
     private readonly listUsers: ListUsersUseCase,
     private readonly getUser: GetUserUseCase,
     private readonly deleteUser: DeleteUserUseCase,
+    private readonly updateUserAvatar: UpdateUserAvatarUseCase,
     @Inject(TOKENS.authCredentialsRepo)
     private readonly credentialsRepo: AuthCredentialsRepository,
   ) {}
@@ -140,6 +154,35 @@ export class UsersController {
     });
     const passwordHash = await bcrypt.hash(input.password, 10);
     await this.credentialsRepo.setPasswordHash(user.id, passwordHash);
+    return presentUser(user);
+  }
+
+  @Put(':id/avatar')
+  @Audit('USER_AVATAR_UPDATED', 'user')
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Atualizar imagem de perfil do usuário (apenas admin)' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID do usuário' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: { type: 'string', format: 'binary', description: 'Arquivo de imagem (JPEG, PNG, WebP, etc.)' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Avatar atualizado', schema: userSchema })
+  @ApiResponse({ status: 401, description: 'Não autenticado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  async uploadAvatar(
+    @Param('id') id: string,
+    @UploadedFile() file: UploadedFileType,
+  ) {
+    const user = await this.updateUserAvatar.execute({
+      userId: id,
+      imageBuffer: file?.buffer ?? null,
+    });
     return presentUser(user);
   }
 
