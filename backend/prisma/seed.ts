@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
@@ -48,7 +48,15 @@ async function main() {
 
   console.log('--- Criando Usuários ---');
   await prisma.user.createMany({
-    data: Object.values(users),
+    data: Object.values(users).map(({ password: _password, ...user }) => user),
+  });
+
+  console.log('--- Criando Credenciais ---');
+  await prisma.authCredential.createMany({
+    data: Object.values(users).map((u) => ({
+      userId: u.id,
+      passwordHash: u.password,
+    })),
   });
 
   /*
