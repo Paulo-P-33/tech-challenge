@@ -61,3 +61,15 @@ model Favorite {
   @@id([userId, targetType, targetId])
   @@map("favorites")
 }
+
+model AuditLog {
+  id         String   @id
+  userId     String?  @map("user_id")
+  userEmail  String?  @map("user_email")
+  action     String
+  targetType String?  @map("target_type")
+  targetId   String?  @map("target_id")
+  createdAt  DateTime @map("created_at")
+
+  @@map("audit_logs")
+}
