@@ -8,6 +8,14 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { z } from 'zod';
 
 import { CreateCategoryUseCase } from '../../../core/categories/use-cases/create-category.usecase';
@@ -23,6 +31,17 @@ const createCategoryBodySchema = z.object({
   name: z.string().min(1),
 });
 
+const categorySchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string' },
+    createdAt: { type: 'string', format: 'date-time' },
+    updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+
+@ApiTags('Categories')
 @UseFilters(DomainExceptionFilter)
 @Controller('/categories')
 export class CategoriesController {
@@ -34,12 +53,22 @@ export class CategoriesController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Listar todas as categorias' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de categorias',
+    schema: { type: 'array', items: categorySchema },
+  })
   async list() {
     const categories = await this.listCategories.execute();
     return categories.map(presentCategory);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar categoria por ID' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID da categoria' })
+  @ApiResponse({ status: 200, description: 'Dados da categoria', schema: categorySchema })
+  @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
   async get(@Param('id') id: string) {
     const category = await this.getCategory.execute(id);
     return presentCategory(category);
@@ -47,6 +76,20 @@ export class CategoriesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Criar categoria (autenticado)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: { type: 'string', example: 'Eletrônicos' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Categoria criada', schema: categorySchema })
+  @ApiResponse({ status: 401, description: 'Não autenticado' })
+  @ApiResponse({ status: 409, description: 'Categoria já existe' })
   async create(@Body() body: unknown) {
     const input = createCategoryBodySchema.parse(body);
     const category = await this.createCategory.execute(input);
@@ -55,6 +98,12 @@ export class CategoriesController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remover categoria (autenticado)' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID da categoria' })
+  @ApiResponse({ status: 200, description: 'Categoria removida', schema: { type: 'object', properties: { ok: { type: 'boolean' } } } })
+  @ApiResponse({ status: 401, description: 'Não autenticado' })
+  @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
   async delete(@Param('id') id: string) {
     await this.deleteCategory.execute(id);
     return { ok: true };

@@ -9,6 +9,14 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
@@ -31,6 +39,20 @@ const createUserBodySchema = z.object({
   password: z.string().min(6),
 });
 
+const userSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string' },
+    email: { type: 'string' },
+    role: { type: 'string', enum: ['user', 'admin'] },
+    createdAt: { type: 'string', format: 'date-time' },
+    updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+
+@ApiTags('Users')
+@ApiBearerAuth()
 @UseFilters(DomainExceptionFilter)
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
@@ -46,18 +68,48 @@ export class UsersController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Listar todos os usuários (apenas admin)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de usuários',
+    schema: { type: 'array', items: userSchema },
+  })
+  @ApiResponse({ status: 401, description: 'Não autenticado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado — role admin necessária' })
   async list() {
     const users = await this.listUsers.execute();
     return users.map(presentUser);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar usuário por ID (apenas admin)' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID do usuário' })
+  @ApiResponse({ status: 200, description: 'Dados do usuário', schema: userSchema })
+  @ApiResponse({ status: 401, description: 'Não autenticado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado — role admin necessária' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   async get(@Param('id') id: string) {
     const user = await this.getUser.execute(id);
     return presentUser(user);
   }
 
   @Post()
+  @ApiOperation({ summary: 'Criar usuário (apenas admin)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name', 'email', 'password'],
+      properties: {
+        name: { type: 'string', example: 'João Silva' },
+        email: { type: 'string', example: 'joao@example.com' },
+        password: { type: 'string', minLength: 6, example: 'senha123' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Usuário criado', schema: userSchema })
+  @ApiResponse({ status: 401, description: 'Não autenticado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado — role admin necessária' })
+  @ApiResponse({ status: 409, description: 'E-mail já cadastrado' })
   async create(@Body() body: unknown) {
     const input = createUserBodySchema.parse(body);
     const user = await this.createUser.execute({
@@ -71,6 +123,12 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover usuário (apenas admin)' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID do usuário' })
+  @ApiResponse({ status: 200, description: 'Usuário removido', schema: { type: 'object', properties: { ok: { type: 'boolean' } } } })
+  @ApiResponse({ status: 401, description: 'Não autenticado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado — role admin necessária' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   async delete(@Param('id') id: string) {
     await this.deleteUser.execute(id);
     return { ok: true };
