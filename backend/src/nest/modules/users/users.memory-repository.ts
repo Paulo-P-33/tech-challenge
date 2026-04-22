@@ -1,3 +1,7 @@
+import type {
+  Paginated,
+  PaginationParams,
+} from '../../../core/shared/pagination';
 import type { User, UserId } from '../../../core/users/user.entity';
 import type { UsersRepository } from '../../../core/users/users.repository';
 
@@ -16,8 +20,16 @@ export class UsersMemoryRepository implements UsersRepository {
     return null;
   }
 
-  async list(): Promise<User[]> {
-    return Array.from(this.items.values());
+  async list({ page, limit }: PaginationParams): Promise<Paginated<User>> {
+    const all = Array.from(this.items.values());
+    const skip = (page - 1) * limit;
+    return {
+      data: all.slice(skip, skip + limit),
+      total: all.length,
+      page,
+      limit,
+      totalPages: Math.ceil(all.length / limit),
+    };
   }
 
   async create(user: User): Promise<void> {

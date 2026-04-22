@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
@@ -13,10 +14,16 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { z } from 'zod';
+
+const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 
 import { CreateCategoryUseCase } from '../../../core/categories/use-cases/create-category.usecase';
 import { DeleteCategoryUseCase } from '../../../core/categories/use-cases/delete-category.usecase';
@@ -58,14 +65,26 @@ export class CategoriesController {
   @Get()
   @Audit('CATEGORY_LIST')
   @ApiOperation({ summary: 'Listar todas as categorias' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: 200,
-    description: 'Lista de categorias',
-    schema: { type: 'array', items: categorySchema },
+    description: 'Lista paginada de categorias',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: categorySchema },
+        total: { type: 'integer' },
+        page: { type: 'integer' },
+        limit: { type: 'integer' },
+        totalPages: { type: 'integer' },
+      },
+    },
   })
-  async list() {
-    const categories = await this.listCategories.execute();
-    return categories.map(presentCategory);
+  async list(@Query() query: unknown) {
+    const { page, limit } = paginationQuerySchema.parse(query);
+    const result = await this.listCategories.execute({ page, limit });
+    return { ...result, data: result.data.map(presentCategory) };
   }
 
   @Get(':id')

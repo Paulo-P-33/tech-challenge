@@ -1,7 +1,12 @@
+import type { Paginated, PaginationParams } from '../shared/pagination';
+
 import type { Favorite, FavoriteTargetType } from './favorite.entity';
 
 export interface FavoritesRepository {
-  listByUser(userId: string): Promise<Favorite[]>;
+  listByUser(
+    userId: string,
+    pagination: PaginationParams,
+  ): Promise<Paginated<Favorite>>;
   exists(
     userId: string,
     targetType: FavoriteTargetType,

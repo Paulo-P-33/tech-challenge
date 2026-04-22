@@ -5,6 +5,10 @@ import {
   FavoriteTargetType,
 } from '../../../core/favorites/favorite.entity';
 import { FavoritesRepository } from '../../../core/favorites/favorites.repository';
+import type {
+  Paginated,
+  PaginationParams,
+} from '../../../core/shared/pagination';
 
 import { PrismaService } from './prisma.service';
 
@@ -12,16 +16,29 @@ import { PrismaService } from './prisma.service';
 export class FavoritesPrismaRepository implements FavoritesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listByUser(userId: string): Promise<Favorite[]> {
-    const rows = await this.prisma.favorite.findMany({ where: { userId } });
-    return rows.map((row) =>
-      Favorite.create({
-        userId: row.userId,
-        targetType: row.targetType as FavoriteTargetType,
-        targetId: row.targetId,
-        createdAt: row.createdAt,
-      }),
-    );
+  async listByUser(
+    userId: string,
+    { page, limit }: PaginationParams,
+  ): Promise<Paginated<Favorite>> {
+    const skip = (page - 1) * limit;
+    const [rows, total] = await Promise.all([
+      this.prisma.favorite.findMany({ where: { userId }, skip, take: limit }),
+      this.prisma.favorite.count({ where: { userId } }),
+    ]);
+    return {
+      data: rows.map((row) =>
+        Favorite.create({
+          userId: row.userId,
+          targetType: row.targetType as FavoriteTargetType,
+          targetId: row.targetId,
+          createdAt: row.createdAt,
+        }),
+      ),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async exists(

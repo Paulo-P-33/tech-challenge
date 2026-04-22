@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import { CategoriesRepository } from '../../../core/categories/categories.repository';
 import { Category, CategoryId } from '../../../core/categories/category.entity';
+import type {
+  Paginated,
+  PaginationParams,
+} from '../../../core/shared/pagination';
 
 import { PrismaService } from './prisma.service';
 
@@ -21,9 +25,19 @@ export class CategoriesPrismaRepository implements CategoriesRepository {
     return Category.create(row);
   }
 
-  async list(): Promise<Category[]> {
-    const rows = await this.prisma.category.findMany();
-    return rows.map((row) => Category.create(row));
+  async list({ page, limit }: PaginationParams): Promise<Paginated<Category>> {
+    const skip = (page - 1) * limit;
+    const [rows, total] = await Promise.all([
+      this.prisma.category.findMany({ skip, take: limit }),
+      this.prisma.category.count(),
+    ]);
+    return {
+      data: rows.map((row) => Category.create(row)),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async create(category: Category): Promise<void> {

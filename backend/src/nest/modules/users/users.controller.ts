@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseFilters,
   UseGuards,
@@ -19,11 +20,17 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+
+const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 
 import { CreateUserUseCase } from '../../../core/users/use-cases/create-user.usecase';
 import { DeleteUserUseCase } from '../../../core/users/use-cases/delete-user.usecase';
@@ -86,19 +93,31 @@ export class UsersController {
   @Get()
   @Audit('USER_LIST')
   @ApiOperation({ summary: 'Listar todos os usuários (apenas admin)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: 200,
-    description: 'Lista de usuários',
-    schema: { type: 'array', items: userSchema },
+    description: 'Lista paginada de usuários',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: userSchema },
+        total: { type: 'integer' },
+        page: { type: 'integer' },
+        limit: { type: 'integer' },
+        totalPages: { type: 'integer' },
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   @ApiResponse({
     status: 403,
     description: 'Acesso negado — role admin necessária',
   })
-  async list() {
-    const users = await this.listUsers.execute();
-    return users.map(presentUser);
+  async list(@Query() query: unknown) {
+    const { page, limit } = paginationQuerySchema.parse(query);
+    const result = await this.listUsers.execute({ page, limit });
+    return { ...result, data: result.data.map(presentUser) };
   }
 
   @Get(':id')

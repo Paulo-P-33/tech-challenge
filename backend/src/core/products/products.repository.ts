@@ -1,8 +1,10 @@
+import type { Paginated, PaginationParams } from '../shared/pagination';
+
 import type { Product, ProductId } from './product.entity';
 
 export interface ProductsRepository {
   findById(id: ProductId): Promise<Product | null>;
-  list(): Promise<Product[]>;
+  list(pagination: PaginationParams): Promise<Paginated<Product>>;
   create(product: Product): Promise<void>;
   save(product: Product): Promise<void>;
   delete(id: ProductId): Promise<void>;

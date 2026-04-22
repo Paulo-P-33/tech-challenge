@@ -10,6 +10,7 @@ Um projeto fullstack moderno com arquitetura limpa, separação de responsabilid
 - [Como Executar](#-como-executar)
 - [Variáveis de Ambiente](#-variáveis-de-ambiente)
 - [API Endpoints](#-api-endpoints)
+- [Paginação](#paginação)
 - [Desenvolvimento](#-desenvolvimento)
 
 ## 🛠️ Tecnologias
@@ -259,29 +260,62 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 
 ## 📡 API Endpoints
 
-### Autenticação
+A documentação interativa completa está disponível via Swagger UI em `http://localhost:3000/docs`.
+
+### Paginação
+
+Todos os endpoints de listagem suportam paginação via query params:
 
 ```http
-POST /auth/login
-Content-Type: application/json
+GET /products?page=1&limit=10
+```
 
-{
-  "email": "admin@example.com",
-  "password": "senha"
-}
+| Parâmetro | Padrão | Máximo | Descrição          |
+|-----------|--------|--------|--------------------|
+| `page`    | `1`    | —      | Página atual       |
+| `limit`   | `10`   | `100`  | Itens por página   |
 
-Response:
+Resposta:
+
+```json
 {
-  "accessToken": "jwt-token-aqui",
-  "refreshToken": "refresh-token-aqui"
+  "data": [...],
+  "total": 42,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 5
 }
 ```
 
-### Usuários
+### Autenticação
 
 ```http
-# Listar
-GET /users
+# Login
+POST /auth/login
+Content-Type: application/json
+
+{ "email": "admin@example.com", "password": "senha" }
+
+# Resposta:
+{ "user": { "id": "...", "name": "...", "email": "...", "role": "admin" }, "accessToken": "jwt-token-aqui" }
+
+# Registrar novo usuário (requer admin)
+POST /auth/register
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "name": "João Silva", "email": "joao@example.com", "password": "senha123" }
+
+# Dados do usuário autenticado
+GET /auth/me
+Authorization: Bearer <token>
+```
+
+### Usuários _(requer admin)_
+
+```http
+# Listar (paginado)
+GET /users?page=1&limit=10
 Authorization: Bearer <token>
 
 # Buscar um
@@ -292,85 +326,90 @@ Authorization: Bearer <token>
 POST /users
 Authorization: Bearer <token>
 Content-Type: application/json
-{
-  "name": "João Silva",
-  "email": "joao@example.com",
-  "role": "user"
-}
+{ "name": "João Silva", "email": "joao@example.com", "password": "senha123" }
+
+# Atualizar avatar (multipart/form-data)
+PUT /users/:id/avatar
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+# campo: avatar (arquivo de imagem)
 
 # Deletar
 DELETE /users/:id
 Authorization: Bearer <token>
 ```
 
-### Categorias
+### Categorias _(requer autenticação)_
 
 ```http
-# Listar
-GET /categories
+# Listar (paginado)
+GET /categories?page=1&limit=10
+Authorization: Bearer <token>
 
 # Buscar uma
 GET /categories/:id
+Authorization: Bearer <token>
 
-# Criar (requer admin)
+# Criar
 POST /categories
 Authorization: Bearer <token>
 Content-Type: application/json
-{
-  "name": "Eletrônicos"
-}
+{ "name": "Eletrônicos" }
 
-# Deletar (requer admin)
+# Deletar
 DELETE /categories/:id
 Authorization: Bearer <token>
 ```
 
-### Produtos
+### Produtos _(requer autenticação)_
 
 ```http
-# Listar
-GET /products
+# Listar (paginado)
+GET /products?page=1&limit=10
+Authorization: Bearer <token>
 
 # Buscar um
 GET /products/:id
+Authorization: Bearer <token>
 
-# Criar (requer admin)
+# Criar (multipart/form-data)
 POST /products
 Authorization: Bearer <token>
-Content-Type: application/json
-{
-  "name": "Notebook Dell",
-  "categoryId": "uuid-da-categoria",
-  "priceAmount": 3500,
-  "priceCurrency": "BRL"
-}
+Content-Type: multipart/form-data
+# campos: name, categoryId, priceCurrency (BRL|USD|EUR), priceAmount (centavos), image (opcional)
 
-# Deletar (requer admin)
+# Atualizar imagem (multipart/form-data)
+PUT /products/:id/image
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+# campo: image (arquivo de imagem)
+
+# Deletar
 DELETE /products/:id
 Authorization: Bearer <token>
 ```
 
-### Favoritos
+### Favoritos _(requer autenticação)_
 
 ```http
-# Listar favoritos do usuário
-GET /favorites
+# Listar favoritos do usuário (paginado)
+GET /me/favorites?page=1&limit=10
 Authorization: Bearer <token>
 
-# Adicionar aos favoritos
-POST /favorites/:targetId
+# Adicionar produto aos favoritos
+POST /products/:id/favorite
 Authorization: Bearer <token>
 
-# Remover dos favoritos
-DELETE /favorites/:targetId
+# Remover produto dos favoritos
+DELETE /products/:id/favorite
 Authorization: Bearer <token>
 ```
 
-### Logs de Auditoria
+### Logs de Auditoria _(requer admin)_
 
 ```http
-# Listar (requer admin)
-GET /audit-logs
+# Listar (paginado)
+GET /audit-logs?page=1&limit=10
 Authorization: Bearer <token>
 ```
 
@@ -422,6 +461,14 @@ npm run start
 2. Backend: muda automático com `npm run start:dev`
 3. Frontend: muda automático com `npm run dev`
 4. Abra http://localhost:3001 no navegador
+
+### Swagger UI
+
+Com o backend rodando, acesse a documentação interativa em:
+
+```
+http://localhost:3000/docs
+```
 
 ### Database - Prisma Studio
 

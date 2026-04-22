@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseFilters,
   UseGuards,
@@ -12,9 +13,16 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { z } from 'zod';
+
+const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 
 import { FavoriteProductUseCase } from '../../../core/favorites/use-cases/favorite-product.usecase';
 import { ListFavoritesUseCase } from '../../../core/favorites/use-cases/list-favorites.usecase';
@@ -83,14 +91,29 @@ export class FavoritesController {
   @Get('/me/favorites')
   @Audit('FAVORITES_LIST')
   @ApiOperation({ summary: 'Listar favoritos do usuário autenticado' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: 200,
-    description: 'Lista de favoritos',
-    schema: { type: 'array', items: favoriteSchema },
+    description: 'Lista paginada de favoritos',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: favoriteSchema },
+        total: { type: 'integer' },
+        page: { type: 'integer' },
+        limit: { type: 'integer' },
+        totalPages: { type: 'integer' },
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
-  async myFavorites(@Req() req: AuthedReq) {
-    const favorites = await this.listFavorites.execute(req.user.id);
-    return favorites.map(presentFavorite);
+  async myFavorites(@Req() req: AuthedReq, @Query() query: unknown) {
+    const { page, limit } = paginationQuerySchema.parse(query);
+    const result = await this.listFavorites.execute(req.user.id, {
+      page,
+      limit,
+    });
+    return { ...result, data: result.data.map(presentFavorite) };
   }
 }

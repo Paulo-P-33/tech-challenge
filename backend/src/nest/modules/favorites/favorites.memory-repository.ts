@@ -3,6 +3,10 @@ import type {
   FavoriteTargetType,
 } from '../../../core/favorites/favorite.entity';
 import type { FavoritesRepository } from '../../../core/favorites/favorites.repository';
+import type {
+  Paginated,
+  PaginationParams,
+} from '../../../core/shared/pagination';
 
 function key(userId: string, type: FavoriteTargetType, targetId: string) {
   return `${userId}:${type}:${targetId}`;
@@ -11,10 +15,21 @@ function key(userId: string, type: FavoriteTargetType, targetId: string) {
 export class FavoritesMemoryRepository implements FavoritesRepository {
   private readonly items = new Map<string, Favorite>();
 
-  async listByUser(userId: string): Promise<Favorite[]> {
-    return Array.from(this.items.values()).filter(
+  async listByUser(
+    userId: string,
+    { page, limit }: PaginationParams,
+  ): Promise<Paginated<Favorite>> {
+    const all = Array.from(this.items.values()).filter(
       (fav) => fav.userId === userId,
     );
+    const skip = (page - 1) * limit;
+    return {
+      data: all.slice(skip, skip + limit),
+      total: all.length,
+      page,
+      limit,
+      totalPages: Math.ceil(all.length / limit),
+    };
   }
 
   async exists(

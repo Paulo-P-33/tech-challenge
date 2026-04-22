@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseFilters,
   UseGuards,
@@ -18,10 +19,16 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { z } from 'zod';
+
+const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 
 import { CreateProductUseCase } from '../../../core/products/use-cases/create-product.usecase';
 import { DeleteProductUseCase } from '../../../core/products/use-cases/delete-product.usecase';
@@ -84,14 +91,26 @@ export class ProductsController {
   @Get()
   @Audit('PRODUCT_LIST')
   @ApiOperation({ summary: 'Listar todos os produtos' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: 200,
-    description: 'Lista de produtos',
-    schema: { type: 'array', items: productSchema },
+    description: 'Lista paginada de produtos',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: productSchema },
+        total: { type: 'integer' },
+        page: { type: 'integer' },
+        limit: { type: 'integer' },
+        totalPages: { type: 'integer' },
+      },
+    },
   })
-  async list() {
-    const products = await this.listProducts.execute();
-    return products.map(presentProduct);
+  async list(@Query() query: unknown) {
+    const { page, limit } = paginationQuerySchema.parse(query);
+    const result = await this.listProducts.execute({ page, limit });
+    return { ...result, data: result.data.map(presentProduct) };
   }
 
   @Get(':id')

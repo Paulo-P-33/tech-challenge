@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
+import type {
+  Paginated,
+  PaginationParams,
+} from '../../../core/shared/pagination';
 import { User, UserId, UserRole } from '../../../core/users/user.entity';
 import { UsersRepository } from '../../../core/users/users.repository';
 
@@ -36,15 +40,25 @@ export class UsersPrismaRepository implements UsersRepository {
     });
   }
 
-  async list(): Promise<User[]> {
-    const rows = await this.prisma.user.findMany();
-    return rows.map((row) =>
-      User.create({
-        ...row,
-        role: row.role as UserRole,
-        avatar: toBuffer(row.avatar),
-      }),
-    );
+  async list({ page, limit }: PaginationParams): Promise<Paginated<User>> {
+    const skip = (page - 1) * limit;
+    const [rows, total] = await Promise.all([
+      this.prisma.user.findMany({ skip, take: limit }),
+      this.prisma.user.count(),
+    ]);
+    return {
+      data: rows.map((row) =>
+        User.create({
+          ...row,
+          role: row.role as UserRole,
+          avatar: toBuffer(row.avatar),
+        }),
+      ),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async create(user: User): Promise<void> {
@@ -54,7 +68,7 @@ export class UsersPrismaRepository implements UsersRepository {
         name: user.name,
         email: user.email,
         role: user.role,
-         
+
         avatar: (user.avatar ?? undefined) as any,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -69,7 +83,7 @@ export class UsersPrismaRepository implements UsersRepository {
         name: user.name,
         email: user.email,
         role: user.role,
-         
+
         avatar: user.avatar as any,
         updatedAt: user.updatedAt,
       },
