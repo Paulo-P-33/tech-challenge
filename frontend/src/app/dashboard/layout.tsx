@@ -140,7 +140,10 @@ export default function DashboardLayout({
     ...adminItems,
   ];
 
-  const menuActions: MenuAction = [{ label: "Sair", command: handleLogout }];
+  const menuActions: MenuAction = [
+    { label: "Meu Perfil", command: () => router.push("/dashboard/profile") },
+    { label: "Sair", command: handleLogout },
+  ];
 
   return (
     <LayoutProvider breakpoint={1024}>

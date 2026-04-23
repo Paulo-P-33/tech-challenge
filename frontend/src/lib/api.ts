@@ -55,6 +55,25 @@ export async function me(): Promise<AuthUser> {
   return request<AuthUser>('/auth/me');
 }
 
+export async function updateMyProfile(data: {
+  name?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}): Promise<AuthUser> {
+  return request<AuthUser>('/auth/me', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateMyAvatar(imageFile: File): Promise<AuthUser> {
+  const form = new FormData();
+  form.append('avatar', imageFile);
+  return request<AuthUser>('/auth/me/avatar', { method: 'PUT', body: form });
+}
+
 // ─── Pagination ───────────────────────────────────────────────────────────────
 
 export interface Paginated<T> {
