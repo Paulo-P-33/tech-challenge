@@ -311,30 +311,32 @@ GET /auth/me
 Authorization: Bearer <token>
 ```
 
-### Usuários _(requer admin)_
+### Usuários
 
 ```http
-# Listar (paginado)
-GET /users?page=1&limit=10
-Authorization: Bearer <token>
-
-# Buscar um
-GET /users/:id
-Authorization: Bearer <token>
-
-# Criar
+# Criar _(requer autenticação)_
+# role é opcional; apenas admins podem criar outros admins
+# não-admins sempre criam usuários com role="user"
 POST /users
 Authorization: Bearer <token>
 Content-Type: application/json
-{ "name": "João Silva", "email": "joao@example.com", "password": "senha123" }
+{ "name": "João Silva", "email": "joao@example.com", "password": "senha123", "role": "user" }
 
-# Atualizar avatar (multipart/form-data)
+# Listar (paginado) _(requer admin)_
+GET /users?page=1&limit=10
+Authorization: Bearer <token>
+
+# Buscar um _(requer admin)_
+GET /users/:id
+Authorization: Bearer <token>
+
+# Atualizar avatar (multipart/form-data) _(requer admin)_
 PUT /users/:id/avatar
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 # campo: avatar (arquivo de imagem)
 
-# Deletar
+# Deletar _(requer admin)_
 DELETE /users/:id
 Authorization: Bearer <token>
 ```

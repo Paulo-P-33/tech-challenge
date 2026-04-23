@@ -50,12 +50,12 @@ Resposta paginada:
 - `POST /auth/register` — requer admin
 - `GET /auth/me` — requer autenticação
 
-**Usuários** _(requer admin)_
-- `GET /users` — paginado
-- `GET /users/:id`
-- `POST /users` `{ “name”: “...”, “email”: “...”, “password”: “...” }`
-- `PUT /users/:id/avatar` — multipart `avatar`
-- `DELETE /users/:id`
+**Usuários**
+- `POST /users` _(requer autenticação)_ `{ “name”: “...”, “email”: “...”, “password”: “...”, “role”?: “user”|”admin” }` — `role=admin` só é aceito quando o solicitante é admin; caso contrário é sempre `”user”`
+- `GET /users` _(requer admin)_ — paginado
+- `GET /users/:id` _(requer admin)_
+- `PUT /users/:id/avatar` _(requer admin)_ — multipart `avatar`
+- `DELETE /users/:id` _(requer admin)_
 
 **Categorias** _(requer autenticação)_
 - `GET /categories` — paginado
