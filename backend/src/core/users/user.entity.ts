@@ -74,6 +74,15 @@ export class User {
     this.props.updatedAt = new Date();
   }
 
+  updateEmail(newEmail: string) {
+    if (!newEmail?.trim()) throw new ValidationError('User.email is required');
+    const email = newEmail.trim().toLowerCase();
+    if (!email.includes('@'))
+      throw new ValidationError('User.email must be a valid email');
+    this.props.email = email;
+    this.props.updatedAt = new Date();
+  }
+
   updateAvatar(data: Buffer | null) {
     this.props.avatar = data;
     this.props.updatedAt = new Date();
