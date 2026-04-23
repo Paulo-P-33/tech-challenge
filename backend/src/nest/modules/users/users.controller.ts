@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseFilters,
   UseGuards,
@@ -53,6 +54,7 @@ const createUserBodySchema = z.object({
   name: z.string().min(1),
   email: z.string().min(3),
   password: z.string().min(6),
+  role: z.enum(['user', 'admin']).optional().default('user'),
 });
 
 const userSchema = {
@@ -77,7 +79,6 @@ const userSchema = {
 @ApiBearerAuth()
 @UseFilters(DomainExceptionFilter)
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 @Controller('/users')
 export class UsersController {
   constructor(
@@ -91,6 +92,7 @@ export class UsersController {
   ) {}
 
   @Get()
+  @Roles('admin')
   @Audit('USER_LIST')
   @ApiOperation({ summary: 'Listar todos os usuários (apenas admin)' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
@@ -121,6 +123,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @Roles('admin')
   @Audit('USER_VIEWED', 'user')
   @ApiOperation({ summary: 'Buscar usuário por ID (apenas admin)' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID do usuário' })
@@ -142,7 +145,9 @@ export class UsersController {
 
   @Post()
   @Audit('USER_CREATED', 'user')
-  @ApiOperation({ summary: 'Criar usuário (apenas admin)' })
+  @ApiOperation({
+    summary: 'Criar usuário (autenticado; role=admin só aceito por admins)',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -151,6 +156,7 @@ export class UsersController {
         name: { type: 'string', example: 'João Silva' },
         email: { type: 'string', example: 'joao@example.com' },
         password: { type: 'string', minLength: 6, example: 'senha123' },
+        role: { type: 'string', enum: ['user', 'admin'], default: 'user' },
       },
     },
   })
@@ -160,17 +166,17 @@ export class UsersController {
     schema: userSchema,
   })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
-  @ApiResponse({
-    status: 403,
-    description: 'Acesso negado — role admin necessária',
-  })
   @ApiResponse({ status: 409, description: 'E-mail já cadastrado' })
-  async create(@Body() body: unknown) {
+  async create(
+    @Body() body: unknown,
+    @Req() req: { user?: { role?: string } },
+  ) {
     const input = createUserBodySchema.parse(body);
+    const role = req.user?.role === 'admin' ? input.role : 'user';
     const user = await this.createUser.execute({
       name: input.name,
       email: input.email,
-      role: 'user',
+      role,
     });
     const passwordHash = await bcrypt.hash(input.password, 10);
     await this.credentialsRepo.setPasswordHash(user.id, passwordHash);
@@ -178,6 +184,7 @@ export class UsersController {
   }
 
   @Put(':id/avatar')
+  @Roles('admin')
   @Audit('USER_AVATAR_UPDATED', 'user')
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiConsumes('multipart/form-data')
@@ -217,6 +224,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   @Audit('USER_DELETED', 'user')
   @ApiOperation({ summary: 'Remover usuário (apenas admin)' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID do usuário' })

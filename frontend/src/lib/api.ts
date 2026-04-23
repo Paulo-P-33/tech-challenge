@@ -142,8 +142,25 @@ export interface AppUser {
   updatedAt: string;
 }
 
-export async function listUsers(): Promise<AppUser[]> {
-  return request<AppUser[]>('/users');
+export async function listUsers(page = 1, limit = 10): Promise<Paginated<AppUser>> {
+  return request<Paginated<AppUser>>(`/users?page=${page}&limit=${limit}`);
+}
+
+export async function createUser(data: {
+  name: string;
+  email: string;
+  password: string;
+  role?: 'user' | 'admin';
+}): Promise<AppUser> {
+  return request<AppUser>('/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteUser(id: string): Promise<void> {
+  await request<void>(`/users/${id}`, { method: 'DELETE' });
 }
 
 export async function updateUserAvatar(id: string, imageFile: File): Promise<AppUser> {

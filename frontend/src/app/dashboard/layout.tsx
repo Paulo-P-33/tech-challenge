@@ -131,6 +131,12 @@ export default function DashboardLayout({
       icon: "category",
       link: "/dashboard/categories",
     },
+    {
+      id: "users",
+      title: "Usuários",
+      icon: "group" as const,
+      link: "/dashboard/users",
+    },
     ...adminItems,
   ];
 
