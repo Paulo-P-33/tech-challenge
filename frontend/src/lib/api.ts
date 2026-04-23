@@ -55,6 +55,16 @@ export async function me(): Promise<AuthUser> {
   return request<AuthUser>('/auth/me');
 }
 
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+export interface Paginated<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 export interface Category {
@@ -64,8 +74,8 @@ export interface Category {
   updatedAt: string;
 }
 
-export async function listCategories(): Promise<Category[]> {
-  return request<Category[]>('/categories');
+export async function listCategories(page = 1, limit = 10): Promise<Paginated<Category>> {
+  return request<Paginated<Category>>(`/categories?page=${page}&limit=${limit}`);
 }
 
 export async function createCategory(name: string): Promise<Category> {
@@ -92,8 +102,8 @@ export interface Product {
   updatedAt: string;
 }
 
-export async function listProducts(): Promise<Product[]> {
-  return request<Product[]>('/products');
+export async function listProducts(page = 1, limit = 10): Promise<Paginated<Product>> {
+  return request<Paginated<Product>>(`/products?page=${page}&limit=${limit}`);
 }
 
 export async function createProduct(
@@ -155,5 +165,6 @@ export interface AuditLog {
 }
 
 export async function listAuditLogs(): Promise<AuditLog[]> {
-  return request<AuditLog[]>('/audit-logs');
+  const result = await request<Paginated<AuditLog>>('/audit-logs?limit=100');
+  return result.data;
 }

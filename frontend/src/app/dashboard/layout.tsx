@@ -1,92 +1,146 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { clearToken, me, type AuthUser } from '@/lib/api';
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { clearToken, me, type AuthUser } from "@/lib/api";
+import {
+  AdminSideBar,
+  AdminUserBar,
+  LayoutProvider,
+  useLayout,
+  useWindowSize,
+  type MenuAction,
+  type SidebarSectionProps,
+} from "@uigovpe/components";
 
-const navLinks = [
-  { href: '/dashboard/products', label: 'Produtos', icon: '📦' },
-  { href: '/dashboard/categories', label: 'Categorias', icon: '🗂️' },
-  { href: '/dashboard/audit', label: 'Auditoria', icon: '📋', adminOnly: true },
-];
+function DashboardShell({
+  children,
+  user,
+  sections,
+  menuActions,
+}: Readonly<{
+  children: React.ReactNode;
+  user: AuthUser | null;
+  sections: SidebarSectionProps[];
+  menuActions: MenuAction;
+}>) {
+  const { collapsed, toggleCollapsed } = useLayout();
+  const { width } = useWindowSize();
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const isMobileSidebar = width <= 1024;
+  const showOverlay = isMobileSidebar && !collapsed;
+  let contentPaddingClass = "pl-0";
+
+  if (!isMobileSidebar) {
+    contentPaddingClass = collapsed ? "pl-[4.5rem]" : "pl-[4.75rem]";
+  }
+
+  return (
+    <div className="flex h-dvh overflow-hidden bg-gray-50">
+      {showOverlay && (
+        <button
+          type="button"
+          aria-label="Fechar menu"
+          onClick={toggleCollapsed}
+          className="fixed inset-0 bg-black/30 z-40"
+        />
+      )}
+
+      <AdminSideBar
+        title="Gov PE"
+        version="1.0.0"
+        sections={sections}
+        className="!z-[60]"
+        ui={
+          isMobileSidebar
+            ? {
+                container: {
+                  style: {
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    height: "100dvh",
+                    width: collapsed ? 0 : "20rem",
+                  },
+                },
+              }
+            : undefined
+        }
+      />
+
+      <div
+        className={`flex flex-col flex-1 min-w-0 w-full overflow-hidden bg-gray-50 transition-all duration-200 ${contentPaddingClass}`}
+      >
+        <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
+            <div className="flex-1 ml-3">
+              <AdminUserBar
+                user={{ name: user?.name ?? "", profile: user?.role ?? "" }}
+                menuActions={menuActions}
+                avatarImage={user?.avatar ?? undefined}
+              />
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto w-full">{children}</main>
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter();
-  const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     me()
       .then(setUser)
-      .catch(() => router.push('/login'));
+      .catch(() => router.push("/login"));
   }, [router]);
 
   function handleLogout() {
     clearToken();
-    router.push('/login');
+    router.push("/login");
   }
 
-  const links = navLinks.filter((l) => !l.adminOnly || user?.role === 'admin');
+  const adminItems =
+    user?.role === "admin"
+      ? [
+          {
+            id: "audit",
+            title: "Auditoria",
+            icon: "assignment" as const,
+            link: "/dashboard/audit",
+          },
+        ]
+      : [];
+
+  const sections: SidebarSectionProps[] = [
+    {
+      id: "products",
+      title: "Produtos",
+      icon: "inventory_2",
+      link: "/dashboard/products",
+    },
+    {
+      id: "categories",
+      title: "Categorias",
+      icon: "category",
+      link: "/dashboard/categories",
+    },
+    ...adminItems,
+  ];
+
+  const menuActions: MenuAction = [{ label: "Sair", command: handleLogout }];
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
-        <div className="px-5 py-5 border-b border-gray-100">
-          <span className="text-base font-bold text-gray-900">Tech Challenge</span>
-        </div>
-
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                pathname.startsWith(link.href)
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <span>{link.icon}</span>
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* User info */}
-        <div className="px-4 py-4 border-t border-gray-100">
-          {user && (
-            <div className="flex items-center gap-3 mb-3">
-              {user.avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                <p className="text-xs text-gray-500 truncate">{user.role}</p>
-              </div>
-            </div>
-          )}
-          <button
-            onClick={handleLogout}
-            className="w-full text-left text-xs text-gray-500 hover:text-red-600 transition-colors px-1"
-          >
-            Sair
-          </button>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto">{children}</main>
-    </div>
+    <LayoutProvider breakpoint={1024}>
+      <DashboardShell user={user} sections={sections} menuActions={menuActions}>
+        {children}
+      </DashboardShell>
+    </LayoutProvider>
   );
 }

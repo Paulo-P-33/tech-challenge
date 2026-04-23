@@ -1,66 +1,115 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { listAuditLogs, type AuditLog } from '@/lib/api';
+import { useEffect, useState } from "react";
+import { listAuditLogs, type AuditLog } from "@/lib/api";
+import { Column, Message, Table } from "@uigovpe/components";
+
+function renderAction(row: Readonly<AuditLog>) {
+  return (
+    <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+      {row.action}
+    </span>
+  );
+}
+
+const renderUser = (row: AuditLog) => row.userEmail ?? "—";
+
+const renderTarget = (row: AuditLog) =>
+  row.targetType ? `${row.targetType}/${row.targetId ?? "—"}` : "—";
+
+const renderDate = (row: AuditLog) =>
+  new Date(row.createdAt).toLocaleString("pt-BR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 export default function AuditPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     listAuditLogs()
       .then(setLogs)
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Erro ao carregar'))
+      .catch((e: unknown) =>
+        setError(e instanceof Error ? e.message : "Erro ao carregar"),
+      )
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-8 text-gray-500 text-sm">Carregando…</div>;
+  if (loading)
+    return (
+      <div className="page-container text-gray-500 text-sm">Carregando…</div>
+    );
 
   return (
-    <div className="p-8">
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Logs de auditoria</h1>
-
-      {error && (
-        <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-          {error}
+    <div className="page-container">
+      <div className="content-wrapper">
+        {/* Page Header */}
+        <div className="page-header">
+          <h1 className="page-title">Logs de auditoria</h1>
+          <p className="page-subtitle">
+            Histórico de todas as ações do sistema
+          </p>
         </div>
-      )}
 
-      {logs.length === 0 ? (
-        <p className="text-sm text-gray-500">Nenhum log encontrado.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Ação</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Usuário</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Alvo</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((log) => (
-                <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">
-                      {log.action}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-gray-700">{log.userEmail ?? '—'}</td>
-                  <td className="py-3 px-4 text-gray-500 text-xs">
-                    {log.targetType ? `${log.targetType}/${log.targetId ?? '—'}` : '—'}
-                  </td>
-                  <td className="py-3 px-4 text-gray-500">
-                    {new Date(log.createdAt).toLocaleString('pt-BR')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        {error && (
+          <Message severity="error" text={error} className="w-full mb-6" />
+        )}
+
+        {/* Logs Table */}
+        {logs.length === 0 ? (
+          <div className="text-center py-12 sm:py-16 bg-white rounded-card border border-gray-200">
+            <p className="text-base sm:text-lg text-gray-500">
+              Nenhum log encontrado.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-card border border-gray-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table
+                value={logs}
+                paginator
+                rows={10}
+                rowsPerPageOptions={[10, 25, 50]}
+                scrollable
+                scrollHeight="flex"
+                showRowsPerPage
+                emptyMessage="Nenhum log encontrado."
+                stripedRows
+                responsiveLayout="scroll"
+                size="small"
+                tableStyle={{ minWidth: "600px" }}
+              >
+                <Column
+                  header="Ação"
+                  body={renderAction}
+                  style={{ width: "120px" }}
+                />
+                <Column
+                  field="userEmail"
+                  header="Usuário"
+                  body={renderUser}
+                  style={{ minWidth: "160px" }}
+                />
+                <Column
+                  header="Alvo"
+                  body={renderTarget}
+                  style={{ minWidth: "160px" }}
+                />
+                <Column
+                  header="Data"
+                  body={renderDate}
+                  style={{ minWidth: "180px" }}
+                />
+              </Table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
