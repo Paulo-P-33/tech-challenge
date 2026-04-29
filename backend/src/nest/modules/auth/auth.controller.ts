@@ -204,7 +204,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('/me')
-  @Audit('PROFILE_UPDATED')
+  @Audit('PROFILE_UPDATED', 'user')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualiza nome, e-mail ou senha do usuário logado' })
   @ApiBody({
@@ -249,7 +249,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Put('/me/avatar')
-  @Audit('PROFILE_AVATAR_UPDATED')
+  @Audit('PROFILE_AVATAR_UPDATED', 'user')
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiConsumes('multipart/form-data')
   @ApiBearerAuth()
