@@ -29,11 +29,6 @@ function DashboardShell({
 
   const isMobileSidebar = width <= 1024;
   const showOverlay = isMobileSidebar && !collapsed;
-  let contentPaddingClass = "pl-0";
-
-  if (!isMobileSidebar) {
-    contentPaddingClass = collapsed ? "pl-[4.5rem]" : "pl-[4.75rem]";
-  }
 
   return (
     <div className="flex h-dvh overflow-hidden bg-gray-50">
@@ -69,7 +64,7 @@ function DashboardShell({
       />
 
       <div
-        className={`flex flex-col flex-1 min-w-0 w-full overflow-hidden bg-gray-50 transition-all duration-200 ${contentPaddingClass}`}
+        className="flex flex-col flex-1 min-w-0 w-full overflow-hidden bg-gray-50"
       >
         <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
           <div className="flex items-center justify-between px-4 py-3 sm:px-6">
